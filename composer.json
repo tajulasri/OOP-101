@@ -1,0 +1,20 @@
+{
+    "name": "tajul/oop-101",
+    "description": "Object oriented training",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tajul",
+            "email": "tajul@sumbermanusia.my"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+
+        "psr-4": {
+            "Fluent\\": "Fluent/"
+        }
+    }
+}
