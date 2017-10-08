@@ -3,6 +3,10 @@
 1. `composer dump-autoload`
 
 ### Basic Usages
+
+> Create Connection
+
+
 ```php
 <?php
 
@@ -31,12 +35,55 @@ $connection = Fluent\ConnectionManager::connect(
         Config::make($config)
     );
 
-$users = QueryBuilder::on($connection)->table('users')->select('id', 'email')->get();
+```
 
-print_r($users);
 
+> Begin Querying
+
+
+### Select basic
+
+```php
+$users = QueryBuilder::on($connection)
+->table('users')->get();
 
 ```
+
+
+### Select Specific columns
+
+```php
+$users = QueryBuilder::on($connection)
+->table('users')
+->select('email','is_activated')
+->get();
+
+```
+
+
+### Where clause Basic
+```php
+$users = QueryBuilder::on($connection)
+->table('users')
+->select('email','is_activated')
+->where('email','sample@yahoo.com')
+->get();
+
+```
+
+
+### Where clause Chaining
+```php
+$users = QueryBuilder::on($connection)
+->table('users')
+->select('email','is_activated')
+->where('email','sample@yahoo.com')
+->where('is_activated',false)
+->where('created_at','2017-01-01','>')
+->get();
+
+```
+
 
 ### Create new Driver
 

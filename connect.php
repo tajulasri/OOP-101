@@ -12,7 +12,7 @@ $config = [
     'database' => [
 
         'driver'   => 'mysql',
-        'database' => 'sample',
+        'database' => 'dadu_binary',
         'username' => 'root',
         'password' => 'root',
         'host'     => '127.0.0.1',
@@ -22,6 +22,10 @@ $config = [
 
 $connection = Fluent\ConnectionManager::connect(new MysqlConnector(), Config::make($config));
 
-$users = QueryBuilder::on($connection)->table('users')->select('id', 'email')->get();
+$users = QueryBuilder::on($connection)
+    ->table('users')
+    ->select(['email', 'id'])
+    ->where('id', 1)
+    ->get();
 
 print_r($users);

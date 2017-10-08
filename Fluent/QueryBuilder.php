@@ -22,7 +22,13 @@ class QueryBuilder
      * selected columns
      * @var [type]
      */
-    protected $columns;
+    protected $columns = '*';
+
+    /**
+     * where parameters
+     * @var [type]
+     */
+    protected $where = [];
 
     /**
      * query
@@ -63,7 +69,16 @@ class QueryBuilder
      */
     public function select($columns = ['*'])
     {
-        $this->columns = is_array($columns) ? $columns : func_get_args();
+
+        $this->columns = is_array($columns) ? join(',', $columns) : implode(',', func_get_args());
+
+        return $this;
+    }
+
+    public function where($column, $value, $operator = '=')
+    {
+        $value = is_int($value) ? sprintf("%d", $value) : sprintf("'%s'", $value);
+        array_push($this->where, [$column, $operator, $value]);
         return $this;
     }
 
@@ -73,23 +88,53 @@ class QueryBuilder
      */
     public function get()
     {
-        $query = $this->prepareQuery();
+
+        $options = $this->parseWhere();
+        $statement = $this->getPrepareSelect($options);
+        $query = $this->prepareQuery($statement);
         $query->execute();
 
-        return $query->fetchAll(\PDO::FETCH_ASSOC);
+        return $query->fetchAll();
 
     }
 
-    protected function prepareQuery()
+    protected function buildWhere()
     {
-        return $this->connection->getConnection()->prepare($this->getPrepareSelect());
+
+        $andClause = [];
+
+        array_push($andClause, implode(' ', $this->where[0]));
+
+        foreach (array_slice($this->where, 1) as $column) {
+
+            $paramBuilder = ' and ' . implode(' ', $column);
+            array_push($andClause, $paramBuilder);
+        }
+
+        return $andClause;
     }
 
-    protected function getPrepareSelect()
+    protected function parseWhere()
     {
-        $selectecColumns = is_array($this->columns) ? implode(',', $this->columns) : $this->columns;
-        $selectPrepare = sprintf('select %s from %s', $selectecColumns, $this->table);
-        return $selectPrepare;
+        $whereBindings = $this->buildWhere();
+        $whereClause = 'where ';
+
+        foreach ($whereBindings as $where) {
+
+            $whereClause .= $where;
+        }
+
+        return $whereClause;
+    }
+
+    protected function prepareQuery($query)
+    {
+        return $this->connection->getConnection()->prepare($query);
+    }
+
+    protected function getPrepareSelect($options = '')
+    {
+        return sprintf('select %s from %s %s', $this->columns, $this->table, $options);
     }
 
 }
